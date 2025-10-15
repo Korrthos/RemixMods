@@ -19,11 +19,11 @@ using System.Runtime.CompilerServices;
 
 namespace SplitScreenCoop
 {
-    [BepInPlugin("com.henpemaz.splitscreencoop", "SplitScreen Co-op", "0.1.21")]
+    [BepInPlugin("com.henpemaz.splitscreencoop.patched", "SplitScreen Co-op", "0.1.22")]
     public partial class SplitScreenCoop : BaseUnityPlugin
     {
         public static SplitScreenCoopOptions Options;
-        
+
         public void OnEnable()
         {
             Logger.LogInfo("OnEnable");
@@ -66,6 +66,8 @@ namespace SplitScreenCoop
         public static bool alwaysSplit;
         public static bool allowCameraSwapping;
         public static bool dualDisplays;
+        public static bool tripleDisplays;
+        public static bool quadDisplays;
         public static bool stickTogetherEnabled;
 
         public static Camera[] fcameras = new Camera[4];
@@ -128,7 +130,7 @@ namespace SplitScreenCoop
                     if (ModManager.ActiveMods[i].id == "WillowWisp.CoopLeash")
                         stickTogetherEnabled = true;
                 }
-                
+
 
                 if (init) return;
                 init = true;
@@ -162,7 +164,7 @@ namespace SplitScreenCoop
                     typeof(SplitScreenCoop).GetMethod("get_ShouldBeCulled"), this);
 
                 // co-op in co-op file
-                On.OverWorld.WorldLoaded += OverWorld_WorldLoaded; // roomrealizer 2 
+                On.OverWorld.WorldLoaded += OverWorld_WorldLoaded; // roomrealizer 2
                 IL.RoomRealizer.Update += RoomRealizer_Update; // they broke roomrealizer
                 On.RoomRealizer.CanAbstractizeRoom += RoomRealizer_CanAbstractizeRoom; // two checks
                 On.ShelterDoor.Close += ShelterDoor_Close; // custom close logic
@@ -293,12 +295,26 @@ namespace SplitScreenCoop
         {
             preferedSplitMode = Options.PreferredSplitMode.Value;
             dualDisplays = Options.DualDisplays.Value;
+
             alwaysSplit = Options.AlwaysSplit.Value;
             allowCameraSwapping = Options.AllowCameraSwapping.Value;
 
-            if (dualDisplays && DualDisplaySupported())
+            if (dualDisplays && MultipleDisplaysSupported(2))
             {
-                InitSecondDisplay();
+                InitOtherDisplay(1);
+                preferedSplitMode = SplitMode.NoSplit;
+                alwaysSplit = false;
+            }
+            else if (tripleDisplays && MultipleDisplaysSupported(3)) {
+                InitOtherDisplay(1);
+                InitOtherDisplay(2);
+                preferedSplitMode = SplitMode.NoSplit;
+                alwaysSplit = false;
+            }
+            else if (quadDisplays && MultipleDisplaysSupported(4)) {
+                InitOtherDisplay(1);
+                InitOtherDisplay(2);
+                InitOtherDisplay(3);
                 preferedSplitMode = SplitMode.NoSplit;
                 alwaysSplit = false;
             }
@@ -309,19 +325,23 @@ namespace SplitScreenCoop
             }
         }
 
-        public static bool DualDisplaySupported()
+        public static bool MultipleDisplaysSupported(int amount)
         {
-            return Display.displays.Length >= 2;
+            return Display.displays.Length >= amount;
+        }
+        public static bool QuaddrupleDisplaySupported()
+        {
+            return Display.displays.Length >= 4;
         }
 
-        public static void InitSecondDisplay()
+        public static void InitOtherDisplay(int displayNumber)
         {
-            if (!Display.displays[1].active)
-                Display.displays[1].Activate();
-            cameraListeners[1].BindToDisplay(Display.displays[1]);
-            cameraListeners[1].mirrorMain = true;
+            if (!Display.displays[displayNumber].active)
+                Display.displays[displayNumber].Activate();
+            cameraListeners[displayNumber].BindToDisplay(Display.displays[displayNumber]);
+            cameraListeners[displayNumber].mirrorMain = true;
         }
-        
+
         /// <summary>
         /// Allocate memory for 4 cameras instead of default 2
         /// </summary>
@@ -352,7 +372,7 @@ namespace SplitScreenCoop
                 }
             }
         }
-        
+
         /// <summary>
         /// Init unity camera 2
         /// </summary>
@@ -526,9 +546,18 @@ namespace SplitScreenCoop
         {
             Logger.LogInfo("RainWorldGame_ShutDownProcess cleanups");
             SetSplitMode(SplitMode.NoSplit, self);
-            if (dualDisplays && DualDisplaySupported())
+            if (dualDisplays && MultipleDisplaysSupported(1))
             {
                 cameraListeners[1].mirrorMain = true;
+            }
+            else if (tripleDisplays && MultipleDisplaysSupported(2)) {
+                cameraListeners[1].mirrorMain = true;
+                cameraListeners[2].mirrorMain = true;
+            }
+            else if (quadDisplays && MultipleDisplaysSupported(3)) {
+                cameraListeners[1].mirrorMain = true;
+                cameraListeners[2].mirrorMain = true;
+                cameraListeners[3].mirrorMain = true;
             }
             realizer2 = null;
             orig(self);
@@ -624,6 +653,32 @@ namespace SplitScreenCoop
                     cameraListeners[1].fcamera.enabled = true;
                     cameraListeners[1].mirrorMain = false;
                     cameraListeners[1].direct = true;
+                }
+                else if (tripleDisplays) {
+                    cameraListeners[0].direct = true;
+
+                    cameraListeners[1].fcamera.enabled = true;
+                    cameraListeners[1].mirrorMain = false;
+                    cameraListeners[1].direct = true;
+
+                    cameraListeners[2].fcamera.enabled = true;
+                    cameraListeners[2].mirrorMain = false;
+                    cameraListeners[2].direct = true;
+                }
+                else if (quadDisplays) {
+                    cameraListeners[0].direct = true;
+
+                    cameraListeners[1].fcamera.enabled = true;
+                    cameraListeners[1].mirrorMain = false;
+                    cameraListeners[1].direct = true;
+
+                    cameraListeners[2].fcamera.enabled = true;
+                    cameraListeners[2].mirrorMain = false;
+                    cameraListeners[2].direct = true;
+
+                    cameraListeners[3].fcamera.enabled = true;
+                    cameraListeners[3].mirrorMain = false;
+                    cameraListeners[3].direct = true;
                 }
                 else
                 {
@@ -759,7 +814,7 @@ namespace SplitScreenCoop
                     self.SetSplitScreenCamera(cam);
                     return;
                 });
-                
+
             }
             catch (Exception e)
             {
@@ -1196,7 +1251,7 @@ namespace SplitScreenCoop
                         cameraListeners[camNum].SetMap(wholeScreen, fourSplitCameraTargetPos[camNum]);
                         break;
                 }
-                
+
             }
             else
             {
@@ -1257,7 +1312,7 @@ namespace SplitScreenCoop
                 self.SetElementDirty(i, self.elementDirty);
             }
         }
-		
+
         public static void CustomDecal_DrawSprites(On.CustomDecal.orig_DrawSprites orig, CustomDecal self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
             int cameraNumber = rCam.cameraNumber;
