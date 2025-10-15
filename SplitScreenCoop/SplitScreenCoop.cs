@@ -19,7 +19,7 @@ using System.Runtime.CompilerServices;
 
 namespace SplitScreenCoop
 {
-    [BepInPlugin("com.henpemaz.splitscreencoop.patched", "SplitScreen Co-op", "0.1.22")]
+    [BepInPlugin("com.henpemaz.splitscreencoop.patched", "SplitScreen Co-op", "0.1.21.1")]
     public partial class SplitScreenCoop : BaseUnityPlugin
     {
         public static SplitScreenCoopOptions Options;
