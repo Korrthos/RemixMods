@@ -23,7 +23,7 @@ namespace SplitScreenCoop
     public partial class SplitScreenCoop : BaseUnityPlugin
     {
         public static SplitScreenCoopOptions Options;
-        
+
         public void OnEnable()
         {
             Logger.LogInfo("OnEnable");
@@ -128,7 +128,7 @@ namespace SplitScreenCoop
                     if (ModManager.ActiveMods[i].id == "WillowWisp.CoopLeash")
                         stickTogetherEnabled = true;
                 }
-                
+
 
                 if (init) return;
                 init = true;
@@ -162,7 +162,7 @@ namespace SplitScreenCoop
                     typeof(SplitScreenCoop).GetMethod("get_ShouldBeCulled"), this);
 
                 // co-op in co-op file
-                On.OverWorld.WorldLoaded += OverWorld_WorldLoaded; // roomrealizer 2 
+                On.OverWorld.WorldLoaded += OverWorld_WorldLoaded; // roomrealizer 2
                 IL.RoomRealizer.Update += RoomRealizer_Update; // they broke roomrealizer
                 On.RoomRealizer.CanAbstractizeRoom += RoomRealizer_CanAbstractizeRoom; // two checks
                 On.ShelterDoor.Close += ShelterDoor_Close; // custom close logic
@@ -321,7 +321,7 @@ namespace SplitScreenCoop
             cameraListeners[1].BindToDisplay(Display.displays[1]);
             cameraListeners[1].mirrorMain = true;
         }
-        
+
         /// <summary>
         /// Allocate memory for 4 cameras instead of default 2
         /// </summary>
@@ -352,7 +352,7 @@ namespace SplitScreenCoop
                 }
             }
         }
-        
+
         /// <summary>
         /// Init unity camera 2
         /// </summary>
@@ -759,7 +759,7 @@ namespace SplitScreenCoop
                     self.SetSplitScreenCamera(cam);
                     return;
                 });
-                
+
             }
             catch (Exception e)
             {
@@ -1196,7 +1196,7 @@ namespace SplitScreenCoop
                         cameraListeners[camNum].SetMap(wholeScreen, fourSplitCameraTargetPos[camNum]);
                         break;
                 }
-                
+
             }
             else
             {
@@ -1257,7 +1257,7 @@ namespace SplitScreenCoop
                 self.SetElementDirty(i, self.elementDirty);
             }
         }
-		
+
         public static void CustomDecal_DrawSprites(On.CustomDecal.orig_DrawSprites orig, CustomDecal self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
             int cameraNumber = rCam.cameraNumber;
