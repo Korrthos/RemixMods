@@ -63,10 +63,10 @@ public class SplitScreenCoopOptions : OptionInterface
             e1 = new OpCheckBox(DualDisplays, 10f, 370) { description = "Requires two physical displays" },
             new OpLabel(40f, 370, "Dual Display (experimental)") { verticalAlignment = OpLabel.LabelVAlignment.Center },
 
-            e2 = new OpCheckBox(DualDisplays, 10f, 330) { description = "Requires three physical displays" },
+            e2 = new OpCheckBox(TripleDisplays, 10f, 330) { description = "Requires three physical displays" },
             new OpLabel(40f, 330, "Triple Displays (experimental)") { verticalAlignment = OpLabel.LabelVAlignment.Center },
 
-            e3 = new OpCheckBox(DualDisplays, 10f, 290) { description = "Requires four physical displays" },
+            e3 = new OpCheckBox(QuadDisplays, 10f, 290) { description = "Requires four physical displays" },
             new OpLabel(40f, 290, "Quadruple Displays (experimental)") { verticalAlignment = OpLabel.LabelVAlignment.Center },
 
 
