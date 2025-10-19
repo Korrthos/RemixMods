@@ -299,19 +299,22 @@ namespace SplitScreenCoop
             alwaysSplit = Options.AlwaysSplit.Value;
             allowCameraSwapping = Options.AllowCameraSwapping.Value;
 
-            if (dualDisplays && MultipleDisplaysSupported(2))
+            if (dualDisplays && DualDisplaysSupported())
             {
                 InitOtherDisplay(1);
                 preferedSplitMode = SplitMode.NoSplit;
                 alwaysSplit = false;
             }
-            else if (tripleDisplays && MultipleDisplaysSupported(3)) {
+            else if (tripleDisplays && DualDisplaysSupported())
+            {
+                Logger.LogInfo("Enabling Triple Dispays");
                 InitOtherDisplay(1);
                 InitOtherDisplay(2);
                 preferedSplitMode = SplitMode.NoSplit;
                 alwaysSplit = false;
             }
-            else if (quadDisplays && MultipleDisplaysSupported(4)) {
+            else if (quadDisplays && DualDisplaysSupported())
+            {
                 InitOtherDisplay(1);
                 InitOtherDisplay(2);
                 InitOtherDisplay(3);
@@ -325,21 +328,17 @@ namespace SplitScreenCoop
             }
         }
 
-        public static bool MultipleDisplaysSupported(int amount)
+        public static bool DualDisplaysSupported()
         {
-            return Display.displays.Length >= amount;
-        }
-        public static bool QuaddrupleDisplaySupported()
-        {
-            return Display.displays.Length >= 4;
+            return Display.displays.Length >= 2;
         }
 
-        public static void InitOtherDisplay(int displayNumber)
+        public static void InitOtherDisplay(int cameraNumber)
         {
-            if (!Display.displays[displayNumber].active)
-                Display.displays[displayNumber].Activate();
-            cameraListeners[displayNumber].BindToDisplay(Display.displays[displayNumber]);
-            cameraListeners[displayNumber].mirrorMain = true;
+            if (!Display.displays[1].active)
+                Display.displays[1].Activate();
+            cameraListeners[cameraNumber].BindToDisplay(Display.displays[1]);
+            cameraListeners[cameraNumber].mirrorMain = true;
         }
 
         /// <summary>
@@ -463,14 +462,14 @@ namespace SplitScreenCoop
                 c.EmitDelegate<Action<RainWorldGame>>((self) =>
                 {
                     Logger.LogInfo("RainWorldGame_ctor1 hookpoint");
-                    if (self.IsStorySession && self.session.Players.Count > 1 && (preferedSplitMode != SplitMode.NoSplit || dualDisplays))
+                    if (self.IsStorySession && self.session.Players.Count > 1 && (preferedSplitMode != SplitMode.NoSplit || dualDisplays || tripleDisplays || quadDisplays))
                     {
                         Logger.LogInfo("RainWorldGame_ctor1 creating roomcamera2");
                         var cams = self.cameras;
                         int ncams = preferedSplitMode == SplitMode.Split4Screen ? 4 : 2;
                         Array.Resize(ref cams, ncams);
                         self.cameras = cams;
-                        for(int i = 1; i < ncams; i++)
+                        for (int i = 1; i < ncams; i++)
                         {
                             cams[i] = new RoomCamera(self, i);
                             if (i < self.session.Players.Count)
@@ -546,15 +545,17 @@ namespace SplitScreenCoop
         {
             Logger.LogInfo("RainWorldGame_ShutDownProcess cleanups");
             SetSplitMode(SplitMode.NoSplit, self);
-            if (dualDisplays && MultipleDisplaysSupported(1))
+            if (dualDisplays && DualDisplaysSupported())
             {
                 cameraListeners[1].mirrorMain = true;
             }
-            else if (tripleDisplays && MultipleDisplaysSupported(2)) {
+            else if (tripleDisplays && DualDisplaysSupported())
+            {
                 cameraListeners[1].mirrorMain = true;
                 cameraListeners[2].mirrorMain = true;
             }
-            else if (quadDisplays && MultipleDisplaysSupported(3)) {
+            else if (quadDisplays && DualDisplaysSupported())
+            {
                 cameraListeners[1].mirrorMain = true;
                 cameraListeners[2].mirrorMain = true;
                 cameraListeners[3].mirrorMain = true;
@@ -618,7 +619,7 @@ namespace SplitScreenCoop
                 }
             }
 
-            if(self.Players.Count > 1)
+            if (self.Players.Count > 1)
             {
                 if (realizer2 != null)
                 {
@@ -650,11 +651,14 @@ namespace SplitScreenCoop
                 if (dualDisplays)
                 {
                     cameraListeners[0].direct = true;
+
                     cameraListeners[1].fcamera.enabled = true;
                     cameraListeners[1].mirrorMain = false;
                     cameraListeners[1].direct = true;
                 }
-                else if (tripleDisplays) {
+                else if (tripleDisplays)
+                {
+                    Logger.LogInfo("triple cam");
                     cameraListeners[0].direct = true;
 
                     cameraListeners[1].fcamera.enabled = true;
@@ -665,7 +669,8 @@ namespace SplitScreenCoop
                     cameraListeners[2].mirrorMain = false;
                     cameraListeners[2].direct = true;
                 }
-                else if (quadDisplays) {
+                else if (quadDisplays)
+                {
                     cameraListeners[0].direct = true;
 
                     cameraListeners[1].fcamera.enabled = true;
@@ -1125,7 +1130,7 @@ namespace SplitScreenCoop
                 c.EmitDelegate<Action<HUD.Map>>((self) =>
                 {
                     List<AbstractCreature> tempCreatures = new List<AbstractCreature>();
-                    if(!(self.hud.rainWorld.processManager.currentMainLoop is RainWorldGame))
+                    if (!(self.hud.rainWorld.processManager.currentMainLoop is RainWorldGame))
                     {
                         return;
                     }

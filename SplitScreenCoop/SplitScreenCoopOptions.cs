@@ -75,9 +75,9 @@ public class SplitScreenCoopOptions : OptionInterface
             new BetterComboBox(PreferredSplitMode, new Vector2(10f, 490), 200f, OpResourceSelector.GetEnumNames(null, typeof(SplitScreenCoop.SplitMode)).ToList()),
         };
 
-        e1.greyedOut = !SplitScreenCoop.MultipleDisplaysSupported(2);
-        e2.greyedOut = !SplitScreenCoop.MultipleDisplaysSupported(3);
-        e3.greyedOut = !SplitScreenCoop.MultipleDisplaysSupported(4);
+        e1.greyedOut = !SplitScreenCoop.DualDisplaysSupported();
+        e2.greyedOut = !SplitScreenCoop.DualDisplaysSupported();
+        e3.greyedOut = !SplitScreenCoop.DualDisplaysSupported();
 
         // Add items to the tab
         opTab.AddItems(UIArrOptions);
