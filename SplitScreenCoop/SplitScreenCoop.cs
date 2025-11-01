@@ -295,12 +295,15 @@ namespace SplitScreenCoop
         {
             preferedSplitMode = Options.PreferredSplitMode.Value;
             dualDisplays = Options.DualDisplays.Value;
+            tripleDisplays = Options.TripleDisplays.Value;
+            quadDisplays = Options.QuadDisplays.Value;
 
             alwaysSplit = Options.AlwaysSplit.Value;
             allowCameraSwapping = Options.AllowCameraSwapping.Value;
 
             if (dualDisplays && DualDisplaysSupported())
             {
+                Logger.LogInfo("Enabling Double Displays");
                 InitOtherDisplay(1);
                 preferedSplitMode = SplitMode.NoSplit;
                 alwaysSplit = false;
@@ -315,6 +318,7 @@ namespace SplitScreenCoop
             }
             else if (quadDisplays && DualDisplaysSupported())
             {
+                Logger.LogInfo("Enabling Quadruple Displays");
                 InitOtherDisplay(1);
                 InitOtherDisplay(2);
                 InitOtherDisplay(3);
@@ -503,6 +507,7 @@ namespace SplitScreenCoop
 
             orig(self, manager);
 
+            Logger.LogInfo($"cameras detected: {self.cameras.Length}");
             if (self.cameras.Length > 1)
             {
                 Logger.LogInfo("camera2 detected");
